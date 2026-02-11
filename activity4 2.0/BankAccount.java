@@ -1,3 +1,4 @@
+// ...existing code...
 public class BankAccount {
     private String accountNumber;
     private String accountName;
@@ -37,6 +38,7 @@ public class BankAccount {
      public boolean setPin(int pin){
         if (pin >= 1000 && pin <= 9999){
             this.pinNumber = pin;
+            TablePrinter.printAccountTable("Set PIN", accountNumber, accountName, balance, String.valueOf(pin));
             return true;
         }else{
             System.out.println("Pin is Invalid! Pin must be a 4-digit number.");
@@ -45,32 +47,21 @@ public class BankAccount {
     }
 
     public void deposit(double amount) {
-        if (amount > 0 ) { 
-
+        if (amount > 0 ) {
             this.balance += amount;
-
-            System.out.println("Successfully deposited: $" + amount);
-            
+            TablePrinter.printTransactionTable("DEPOSIT", amount, balance);
         } else {
-
             System.out.println("Deposit amount must not be below zero.");
-
         }
     }
 
     public void withdraw(double amount) {
-
-        if (amount > 0 && amount <= balance) { 
-
+        if (amount > 0 && amount <= balance) {
             balance -= amount;
-            System.out.println("Successfully withdrew: $" + amount);
-
+            TablePrinter.printTransactionTable("WITHDRAW", amount, balance);
         } else {
-
             System.out.println("Invalid withdrawal amount or insufficient funds.");
-
         }
-
     }
 
 

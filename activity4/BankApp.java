@@ -1,12 +1,9 @@
-package activity4;
-
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.FileInputStream;
 
 public class BankApp {
 
@@ -36,7 +33,11 @@ public class BankApp {
         System.out.print("ENTER ACCOUNT NUMBER: ");
         String accountNumber = sc.nextLine();
 
-        BankAccount account = findAccount(accounts, accountNumber);
+        System.out.print("ENTER PIN: ");
+        int pin = sc.nextInt();
+        sc.nextLine();
+
+        BankAccount account = findAccount(accounts, accountNumber, pin);
         if (account != null) {
             System.out.print("ENTER AMOUNT TO DEPOSIT: ");
             double amount = sc.nextDouble();
@@ -52,7 +53,11 @@ public class BankApp {
         System.out.print("ENTER ACCOUNT NUMBER: ");
         String accountNumber = sc.nextLine();
 
-        BankAccount account = findAccount(accounts, accountNumber);
+        System.out.print("ENTER PIN: ");
+        int pin = sc.nextInt();
+        sc.nextLine();
+
+        BankAccount account = findAccount(accounts, accountNumber, pin);
 
         if (account != null) {
             System.out.print("ENTER AMOUNT TO WITHDRAW: ");
@@ -65,9 +70,9 @@ public class BankApp {
         }
     }
 
-    public static BankAccount findAccount(ArrayList<BankAccount> accounts, String accountNumber) {
+    public static BankAccount findAccount(ArrayList<BankAccount> accounts, String accountNumber, int pin) {
         for (BankAccount account : accounts) {
-            if (account.getAccountNumber().equals(accountNumber)) {
+            if (account.getAccountNumber().equals(accountNumber) && account.getPin() == pin) {
                 return account;
             }
         }
@@ -89,7 +94,7 @@ public class BankApp {
 
             System.out.println("\n===== BANK MENU =====");
             System.out.println("1. CREATE NEW ACCOUNT");
-            System.out.println("2. VIEW ACCOUNTS");
+            System.out.println("2. VIEW ACCOUNT");
             System.out.println("3. DEPOSIT");
             System.out.println("4. WITHDRAW");
             System.out.println("5. EXIT");
@@ -119,14 +124,21 @@ public class BankApp {
                     break;
 
                 case "2":
-                    System.out.println("\n--- YOUR ACCOUNTS ---");
-                    if (accounts.isEmpty()) {
-                        System.out.println("NO ACCOUNTS FOUND, CREATE AN ACCOUNT!");
+                    System.out.print("ENTER ACCOUNT NUMBER: ");
+                    accountNumber = sc.nextLine();
+
+                    System.out.print("ENTER PIN: ");
+                    int pin = sc.nextInt();
+                    sc.nextLine();
+
+                    BankAccount account = findAccount(accounts, accountNumber, pin);
+
+                    if (account != null) {
+                        System.out.println("\n--- YOUR ACCOUNT ---");
+                        System.out.println("Account Number: " + account.getAccountNumber() + ", Account Name: "
+                                + account.getAccountName() + ", Balance: $" + account.getBalance());
                     } else {
-                        for (BankAccount account : accounts) {
-                            System.out.println("Account Number: " + account.getAccountNumber() + ", Account Name: "
-                                    + account.getAccountName() + ", Balance: $" + account.getBalance());
-                        }
+                        System.out.println("ACCOUNT NOT FOUND! PLEASE CHECK THE ACCOUNT NUMBER AND TRY AGAIN.");
                     }
                     break;
 
@@ -139,19 +151,17 @@ public class BankApp {
                     break;
 
                 case "5":
-                    isRunning = false;
-                    try{
-                        FileOutputStream fos = new FileOutputStream(file);
+                    try (FileOutputStream fos = new FileOutputStream(file);){
                         String header = "Account Number,Account Name,Balance,Pin\n";
                         fos.write(header.getBytes());
 
-                        for (BankAccount account : accounts) {
-                            String line = account.getAccountNumber() + "," + account.getAccountName() + ","
-                            + account.getBalance() + "," + account.getPin() + "\n";
+                        for (BankAccount ac : accounts) {
+                            String line = ac.getAccountNumber() + "," + ac.getAccountName() + ","
+                                    + ac.getBalance() + "," + ac.getPin() + "\n";
                             fos.write(line.getBytes());
                         }
                         System.out.println("THANK YOU FOR USING THE BANK APP. GOODBYE!");
-                        fos.close();
+                        isRunning = false;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
