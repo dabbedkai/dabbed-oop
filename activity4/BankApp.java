@@ -7,6 +7,7 @@ import java.io.IOException;
 
 public class BankApp {
 
+    
     public static void loadAccounts(ArrayList<BankAccount> accounts) {
 
         try (Scanner reader = new Scanner(new File("accounts.csv"))) {
@@ -29,20 +30,73 @@ public class BankApp {
         }
     }
 
-    public static void depositAccount(ArrayList<BankAccount> accounts, Scanner sc) {
-        System.out.print("ENTER ACCOUNT NUMBER: ");
-        String accountNumber = sc.nextLine();
+    // --- Input validator helpers ---
+    public static String readNonEmptyString(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            if (!input.isEmpty()) {
+                return input;
+            }
+            System.out.println("INPUT CANNOT BE EMPTY. PLEASE TRY AGAIN.");
+        }
+    }
 
-        System.out.print("ENTER PIN: ");
-        int pin = sc.nextInt();
-        sc.nextLine();
+    public static double readDouble(Scanner sc, String prompt, double minInclusive) {
+        while (true) {
+            System.out.print(prompt);
+            String in = sc.nextLine().trim();
+            try {
+                double v = Double.parseDouble(in);
+                if (v >= minInclusive) {
+                    return v;
+                } else {
+                    System.out.println("VALUE MUST BE >= " + minInclusive + ". PLEASE TRY AGAIN.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("INVALID NUMBER. PLEASE ENTER A VALID NUMBER.");
+            }
+        }
+    }
+
+    public static int readInt(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String in = sc.nextLine().trim();
+            try {
+                return Integer.parseInt(in);
+            } catch (NumberFormatException e) {
+                System.out.println("INVALID INTEGER. PLEASE TRY AGAIN.");
+            }
+        }
+    }
+
+    public static int readIntWithDigits(Scanner sc, String prompt, int digits) {
+        while (true) {
+            int val = readInt(sc, prompt);
+            if (String.valueOf(Math.abs(val)).length() == digits) {
+                return val;
+            }
+            System.out.println("VALUE MUST BE " + digits + " DIGITS. PLEASE TRY AGAIN.");
+        }
+    }
+
+    public static String readMenuOption(Scanner sc) {
+        while (true) {
+            System.out.print("CHOOSE AN OPTION: ");
+            String opt = sc.nextLine().trim();
+            if (opt.matches("[1-5]")) return opt;
+            System.out.println("INVALID OPTION! PLEASE CHOOSE A VALID OPTION 1-5.");
+        }
+    }
+
+    public static void depositAccount(ArrayList<BankAccount> accounts, Scanner sc) {
+        String accountNumber = readNonEmptyString(sc, "ENTER ACCOUNT NUMBER: ");
+        int pin = readIntWithDigits(sc, "ENTER PIN: ", 4);
 
         BankAccount account = findAccount(accounts, accountNumber, pin);
         if (account != null) {
-            System.out.print("ENTER AMOUNT TO DEPOSIT: ");
-            double amount = sc.nextDouble();
-            sc.nextLine();
-
+            double amount = readDouble(sc, "ENTER AMOUNT TO DEPOSIT: ", 0.01);
             account.deposit(amount);
         } else {
             System.out.println("ACCOUNT NOT FOUND! PLEASE CHECK THE ACCOUNT NUMBER AND TRY AGAIN.");
@@ -50,20 +104,13 @@ public class BankApp {
     }
 
     public static void withdrawAccount(ArrayList<BankAccount> accounts, Scanner sc) {
-        System.out.print("ENTER ACCOUNT NUMBER: ");
-        String accountNumber = sc.nextLine();
-
-        System.out.print("ENTER PIN: ");
-        int pin = sc.nextInt();
-        sc.nextLine();
+        String accountNumber = readNonEmptyString(sc, "ENTER ACCOUNT NUMBER: ");
+        int pin = readIntWithDigits(sc, "ENTER PIN: ", 4);
 
         BankAccount account = findAccount(accounts, accountNumber, pin);
 
         if (account != null) {
-            System.out.print("ENTER AMOUNT TO WITHDRAW: ");
-            double amount = sc.nextDouble();
-            sc.nextLine();
-
+            double amount = readDouble(sc, "ENTER AMOUNT TO WITHDRAW: ", 0.01);
             account.withdraw(amount);
         } else {
             System.out.println("ACCOUNT NOT FOUND! PLEASE CHECK THE ACCOUNT NUMBER AND TRY AGAIN.");
@@ -98,25 +145,14 @@ public class BankApp {
             System.out.println("3. DEPOSIT");
             System.out.println("4. WITHDRAW");
             System.out.println("5. EXIT");
-            System.out.print("CHOOSE AN OPTION: ");
-
-            String userInput = sc.nextLine();
+            String userInput = readMenuOption(sc);
 
             switch (userInput) {
                 case "1":
-                    System.out.print("ENTER ACCOUNT NUMBER: ");
-                    String accountNumber = sc.nextLine();
-
-                    System.out.print("ENTER ACCOUNT NAME: ");
-                    String accountName = sc.nextLine();
-
-                    System.out.print("ENTER INITIAL BALANCE: ");
-                    double balance = sc.nextDouble();
-                    sc.nextLine();
-
-                    System.out.print("SET A 4-DIGIT PIN: ");
-                    int pinNumber = sc.nextInt();
-                    sc.nextLine();
+                    String accountNumber = readNonEmptyString(sc, "ENTER ACCOUNT NUMBER: ");
+                    String accountName = readNonEmptyString(sc, "ENTER ACCOUNT NAME: ");
+                    double balance = readDouble(sc, "ENTER INITIAL BALANCE: ", 0.0);
+                    int pinNumber = readIntWithDigits(sc, "SET A 4-DIGIT PIN: ", 4);
 
                     BankAccount newAccount = new BankAccount(accountNumber, accountName, balance, pinNumber);
                     accounts.add(newAccount);
@@ -124,12 +160,8 @@ public class BankApp {
                     break;
 
                 case "2":
-                    System.out.print("ENTER ACCOUNT NUMBER: ");
-                    accountNumber = sc.nextLine();
-
-                    System.out.print("ENTER PIN: ");
-                    int pin = sc.nextInt();
-                    sc.nextLine();
+                    accountNumber = readNonEmptyString(sc, "ENTER ACCOUNT NUMBER: ");
+                    int pin = readIntWithDigits(sc, "ENTER PIN: ", 4);
 
                     BankAccount account = findAccount(accounts, accountNumber, pin);
 
